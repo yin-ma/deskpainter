@@ -48,18 +48,6 @@ class CommandBoard:
     def del_entry(self):
         self.entry.delete("1.0", tk.END)
 
-    def execute_code(self, code):
-        try:
-            with open("temp_script.py", "w") as script:
-                script.write(code)
-            result = subprocess.check_output(["python", "temp_script.py"], stderr=subprocess.STDOUT, universal_newlines=True)
-            self.append_text(f">> {result}")
-        except subprocess.CalledProcessError as e:
-            error_msg = e.output.split("\n")[-2]
-            self.append_text(f">> {error_msg}")
-        except Exception as e:
-            self.append_text(f">> error, please try again")
-
     def execute_command(self, command, args):
         if command in self.command.command:
             self.command.command[command](args)
