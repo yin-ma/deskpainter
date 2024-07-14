@@ -26,6 +26,21 @@ class PenPanel(tk.Frame):
         return self.butt_dict
 
     def init_butts(self):
+        temp = tk.Button(self,
+                         image=self.img,
+                         bg=self.transparent_color,
+                         activebackground=self.transparent_color,
+                         highlightthickness=0,
+                         bd=0,
+                         wraplength=0,
+                         compound="center",
+                         justify="center",
+                         text=f"B",
+                         font=self.font)
+        self.butt_dict["b"] = temp
+        temp.pack(anchor=tk.SE)
+        temp.pack_forget()
+
         size = len(self.pen_size_lst)
         for b in self.pen_size_lst:
             temp = tk.Button(self,

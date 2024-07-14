@@ -67,11 +67,31 @@ class Command:
             "/clear": self.clear_board,
             "/pen_size": self.set_pen_size,
             "/pen_color": self.set_pen_color,
+            "/border_mode": self.set_border_mode,
+            "/border_color": self.set_border_color,
+            "/border_size": self.set_border_size,
             "/save": self.save_locus,
             "/load": self.load_locus,
             "/quit": sys.exit,
             "/exit": sys.exit,
         }
+
+    def set_border_color(self, args):
+        self.command_board.data_manager.border_line_options["fill"] = args
+
+    def set_border_size(self, args):
+        self.command_board.data_manager.border_line_options["width"] = args
+
+    def set_border_mode(self, args):
+        if not args:
+            self.command_board.data_manager.border_mode = False
+            return
+        if len(args) == 1:
+            print(args)
+            if args[0] == "1":
+                self.command_board.data_manager.border_mode = True
+            else:
+                self.command_board.data_manager.border_mode = False
 
     def save_locus(self, args):
         if not args:

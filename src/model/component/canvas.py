@@ -8,8 +8,10 @@ class Canvas:
         self.isDrawing = False
         self.points = []
         self.line = None
+        self.border = None
 
         self.line_options = self.data_manager.line_options
+        self.border_line_options = self.data_manager.border_line_options
 
         self.view.bind("<Button-1>", self.mouse_down)
         self.view.bind('<B1-Motion>', self.mouse_move)
@@ -27,14 +29,22 @@ class Canvas:
         if self.isDrawing:
             self.points.extend([event.x, event.y])
             if len(self.points) == 4:
+                if self.data_manager.border_mode:
+                    self.border = self.canvas.create_line(self.points, **self.border_line_options)
                 self.line = self.canvas.create_line(self.points, **self.line_options)
             elif len(self.points) >= 4:
+                if self.data_manager.border_mode:
+                    self.canvas.coords(self.border, self.points)
                 self.canvas.coords(self.line, self.points)
 
     def mouse_up(self, event):
         self.isDrawing = False
         if len(self.points) >= 4:
+            if self.data_manager.border_mode:
+                self.data_manager.add_line(self.border)
+                self.data_manager.add_history(self.points.copy(), self.border_line_options.copy())
             self.data_manager.add_line(self.line)
             self.data_manager.add_history(self.points.copy(), self.line_options.copy())
         self.points.clear()
+        self.border = None
         self.line = None

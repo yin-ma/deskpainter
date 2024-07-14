@@ -8,6 +8,12 @@ class DataManager:
         self.line_history = []
         self.redo_history = []
 
+        self.border_mode = False
+        self.border_line_options = {
+            "fill": "#000000",
+            "width": str(int(setting.get_config_by_key("default_pen_size")) + 5)
+        }
+
         self.line_options = {
             "fill": setting.get_config_by_key("default_pen_color"),
             "width": setting.get_config_by_key("default_pen_size")
