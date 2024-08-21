@@ -62,7 +62,6 @@ class Command:
         self.command_board = command_board
         self.text_box = command_board.text_box
         self.entry = command_board.entry
-        self.bg = None
 
         self.command = {
             "/help": self.show_help,
@@ -158,9 +157,9 @@ class Command:
             if len(args) == 1:
                 filename = f"../save/{args[0]}.png"
             im.save(filename)
-            self.command_board.append_text(f"screenshot saved as {filename}")
             self.command_board.board.deiconify()
             self.command_board.main_activity.hide_butt.show_panel()
+            self.command_board.append_text(f"screenshot saved as {filename}")
         canvas = self.command_board.main_activity.canvas.canvas
         self.command_board.main_activity.hide_butt.hide_panel()
         self.command_board.main_activity.hide_butt.butt_dict["hide_butt"].place_forget()
@@ -169,6 +168,8 @@ class Command:
 
     def remove_bg(self, args):
         canvas = self.command_board.main_activity.canvas.canvas
+        data_manager = self.command_board.main_activity.data_manager
+        data_manager.bg = None
         canvas.delete("all")
         for obj, arg in self.command_board.main_activity.data_manager.line_history:
             line_id = canvas.create_line(obj, **arg)
@@ -182,13 +183,22 @@ class Command:
             f_is_exist = os.path.isfile(f"../save/{file_name}.png")
 
             if f_is_exist:
-                self.bg = ImageTk.PhotoImage(Image.open(f"../save/{file_name}.png"))
                 canvas = self.command_board.main_activity.canvas.canvas
+                data_manager = self.command_board.main_activity.data_manager
+                data_manager.bg = ImageTk.PhotoImage(Image.open(f"../save/{file_name}.png"))
                 width, height = canvas.winfo_width(), canvas.winfo_height()
-                canvas.create_image(width*0.5, height*0.5, image=self.bg)
+
+                line_history = data_manager.line_history.copy()
+
+                self.command_board.main_activity.clear_butt.clear()
+                canvas.create_image(width*0.5, height*0.5, image=data_manager.bg)
                 self.command_board.append_text(f"background loaded as {file_name}.png")
-                for obj, arg in self.command_board.main_activity.data_manager.line_history:
+
+                data_manager.line_history = line_history.copy()
+
+                for obj, arg in line_history:
                     line_id = canvas.create_line(obj, **arg)
+                    data_manager.add_line(line_id)
             else:
                 self.command_board.append_text(f"invalid file name")
         else:

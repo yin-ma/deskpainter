@@ -7,6 +7,7 @@ class DataManager:
         self.line_id = []
         self.line_history = []
         self.redo_history = []
+        self.bg = None
 
         self.border_mode = False
         self.border_line_options = {
@@ -24,7 +25,8 @@ class DataManager:
         self.screens = {
             i: {"line_history": [],
                 "redo_history": [],
-                "line_id": []
+                "line_id": [],
+                "bg": None
                 } for i in range(int(setting.get_config_by_key("num_screen")))
             }
 
@@ -57,6 +59,7 @@ class DataManager:
         self.screens[self.screen_id]["line_history"] = self.line_history.copy()
         self.screens[self.screen_id]["line_id"] = self.line_id.copy()
         self.screens[self.screen_id]["redo_history"] = self.redo_history.copy()
+        self.screens[self.screen_id]["bg"] = self.bg
         self.screen_id += 1
         self.screen_id = self.screen_id % self.num_screen
 
@@ -65,5 +68,7 @@ class DataManager:
         self.line_history = self.screens[self.screen_id]["line_history"]
         self.line_id = self.screens[self.screen_id]["line_id"]
         self.redo_history = self.screens[self.screen_id]["redo_history"]
+        self.bg = self.screens[self.screen_id]["bg"]
+
         return self.screen_id, self.line_history
 
