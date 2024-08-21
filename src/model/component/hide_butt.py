@@ -70,4 +70,7 @@ class HideButt:
             if self.data_manager.num_command_butt_clicks % 2 == 1:
                 self.command_board.deiconify()
 
+        self.main_activity.get_widget_by_tag("panel").lift()
+        self.main_activity.get_widget_by_tag("panel").update()
         self.data_manager.num_main_butt_clicks += 1
+

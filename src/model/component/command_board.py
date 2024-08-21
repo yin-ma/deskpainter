@@ -153,7 +153,7 @@ class Command:
             y1 = y0 + canvas.winfo_height()
 
             im = ImageGrab.grab((x0, y0, x1, y1))
-            filename = "../save/df.png"
+            filename = "../save/sc.png"
             if len(args) == 1:
                 filename = f"../save/{args[0]}.png"
             im.save(filename)
