@@ -73,6 +73,7 @@ class Command:
             "/border_color": self.set_border_color,
             "/border_size": self.set_border_size,
             "/bg": self.set_bg,
+            "/alpha_bg": self.set_alpha_bg,
             "/save": self.save_locus,
             "/load": self.load_locus,
             "/loadbg": self.load_bg,
@@ -99,6 +100,16 @@ class Command:
             else:
                 self.command_board.data_manager.border_mode = False
 
+    def set_alpha_bg(self, args):
+        if not args:
+            self.command_board.append_text("require args")
+        elif len(args) == 2:
+            color, alpha = args[0], args[1]
+            view = self.command_board.main_activity.get_widget_by_tag("view")
+            view.set_alpha_bg(color, float(alpha))
+        else:
+            self.command_board.append_text("invalid args")
+
     def set_bg(self, args):
         if not args:
             self.command_board.append_text("require args")
@@ -106,6 +117,7 @@ class Command:
             canvas = self.command_board.main_activity.canvas.canvas
             try:
                 canvas.config(bg=args)
+                self.command_board.main_activity.data_manager.bgColor = args
             except:
                 self.command_board.append_text("invalid color")
         else:
@@ -169,7 +181,7 @@ class Command:
     def remove_bg(self, args):
         canvas = self.command_board.main_activity.canvas.canvas
         data_manager = self.command_board.main_activity.data_manager
-        data_manager.bg = None
+        data_manager.bgImg = None
         canvas.delete("all")
         for obj, arg in self.command_board.main_activity.data_manager.line_history:
             line_id = canvas.create_line(obj, **arg)
@@ -185,13 +197,13 @@ class Command:
             if f_is_exist:
                 canvas = self.command_board.main_activity.canvas.canvas
                 data_manager = self.command_board.main_activity.data_manager
-                data_manager.bg = ImageTk.PhotoImage(Image.open(f"../save/{file_name}.png"))
+                data_manager.bgImg = ImageTk.PhotoImage(Image.open(f"../save/{file_name}.png"))
                 width, height = canvas.winfo_width(), canvas.winfo_height()
 
                 line_history = data_manager.line_history.copy()
 
                 self.command_board.main_activity.clear_butt.clear()
-                canvas.create_image(width*0.5, height*0.5, image=data_manager.bg)
+                canvas.create_image(width*0.5, height*0.5, image=data_manager.bgImg)
                 self.command_board.append_text(f"background loaded as {file_name}.png")
 
                 data_manager.line_history = line_history.copy()

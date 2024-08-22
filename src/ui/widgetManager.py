@@ -19,6 +19,16 @@ class WidgetManager(tk.Tk):
         self.registry()
         self.bind('<Escape>', lambda event: sys.exit())
 
+        self.wid, self.hei = self.winfo_width(), self.winfo_height()
+        self.img = None
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+
+    def set_alpha_bg(self, color, alpha):
+        alpha = min(max(alpha, 0.01), 1.0)
+        self.attributes("-alpha", alpha)
+        self.canvas.config(bg=color)
+
     def registry(self):
         self.add_widget("view", self)
 
