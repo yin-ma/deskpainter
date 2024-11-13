@@ -1,4 +1,6 @@
 import tkinter as tk
+from PIL import Image, ImageTk, ImageGrab
+
 import sys
 import subprocess
 import json
@@ -70,8 +72,13 @@ class Command:
             "/border_mode": self.set_border_mode,
             "/border_color": self.set_border_color,
             "/border_size": self.set_border_size,
+            "/bg": self.set_bg,
+            "/alpha_bg": self.set_alpha_bg,
             "/save": self.save_locus,
             "/load": self.load_locus,
+            "/loadbg": self.load_bg,
+            "/rmbg": self.remove_bg,
+            "/sc": self.screenshot,
             "/quit": sys.exit,
             "/exit": sys.exit,
         }
@@ -93,9 +100,32 @@ class Command:
             else:
                 self.command_board.data_manager.border_mode = False
 
+    def set_alpha_bg(self, args):
+        if not args:
+            self.command_board.append_text("require args")
+        elif len(args) == 2:
+            color, alpha = args[0], args[1]
+            view = self.command_board.main_activity.get_widget_by_tag("view")
+            view.set_alpha_bg(color, float(alpha))
+        else:
+            self.command_board.append_text("invalid args")
+
+    def set_bg(self, args):
+        if not args:
+            self.command_board.append_text("require args")
+        elif len(args) == 1:
+            canvas = self.command_board.main_activity.canvas.canvas
+            try:
+                canvas.config(bg=args)
+                self.command_board.main_activity.data_manager.bgColor = args
+            except:
+                self.command_board.append_text("invalid color")
+        else:
+            self.command_board.append_text("invalid args")
+
     def save_locus(self, args):
         if not args:
-            self.command_board.append_text("require a file name")
+            self.command_board.append_text("require file name")
         elif len(args) == 1:
             locus = self.command_board.data_manager.line_history
             with open(f'../save/{args[0]}.locus', 'w') as f:
@@ -106,7 +136,7 @@ class Command:
 
     def load_locus(self, args):
         if not args:
-            self.command_board.append_text("require a file name")
+            self.command_board.append_text("require file name")
         elif len(args) == 1:
             file_name = args[0]
             f_is_exist = os.path.isfile(f"../save/{file_name}.locus")
@@ -122,6 +152,65 @@ class Command:
                         obj, **arg)
                     self.command_board.data_manager.line_id.append(self.command_board.data_manager.line)
                 self.command_board.append_text(f"locus loaded")
+            else:
+                self.command_board.append_text(f"invalid file name")
+        else:
+            self.command_board.append_text("invalid file name")
+
+    def screenshot(self, args):
+        def sc():
+            x0 = canvas.winfo_rootx()
+            y0 = canvas.winfo_rooty()
+            x1 = x0 + canvas.winfo_width()
+            y1 = y0 + canvas.winfo_height()
+
+            im = ImageGrab.grab((x0, y0, x1, y1))
+            filename = "../save/sc.png"
+            if len(args) == 1:
+                filename = f"../save/{args[0]}.png"
+            im.save(filename)
+            self.command_board.board.deiconify()
+            self.command_board.main_activity.hide_butt.show_panel()
+            self.command_board.append_text(f"screenshot saved as {filename}")
+        canvas = self.command_board.main_activity.canvas.canvas
+        self.command_board.main_activity.hide_butt.hide_panel()
+        self.command_board.main_activity.hide_butt.butt_dict["hide_butt"].place_forget()
+        self.command_board.board.withdraw()
+        self.command_board.main_activity.widget_manager.after(100, sc)
+
+    def remove_bg(self, args):
+        canvas = self.command_board.main_activity.canvas.canvas
+        data_manager = self.command_board.main_activity.data_manager
+        data_manager.bgImg = None
+        canvas.delete("all")
+        for obj, arg in self.command_board.main_activity.data_manager.line_history:
+            line_id = canvas.create_line(obj, **arg)
+        self.command_board.append_text(f"background cleared")
+
+    def load_bg(self, args):
+        if not args or len(args) == 1:
+            file_name = "df"
+            if len(args) == 1:
+                file_name = args[0]
+            f_is_exist = os.path.isfile(f"../save/{file_name}.png")
+
+            if f_is_exist:
+                canvas = self.command_board.main_activity.canvas.canvas
+                data_manager = self.command_board.main_activity.data_manager
+                data_manager.bgImg = ImageTk.PhotoImage(Image.open(f"../save/{file_name}.png"))
+                width, height = canvas.winfo_width(), canvas.winfo_height()
+
+                line_history = data_manager.line_history.copy()
+
+                self.command_board.main_activity.clear_butt.clear()
+                canvas.create_image(width*0.5, height*0.5, image=data_manager.bgImg)
+                self.command_board.append_text(f"background loaded as {file_name}.png")
+
+                data_manager.line_history = line_history.copy()
+
+                for obj, arg in line_history:
+                    line_id = canvas.create_line(obj, **arg)
+                    data_manager.add_line(line_id)
             else:
                 self.command_board.append_text(f"invalid file name")
         else:

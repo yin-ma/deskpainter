@@ -14,8 +14,17 @@ class ScrButt:
         screen_id, line_history = self.data_manager.change_screen()
         self.canvas.delete("all")
         self.butt.config(text=f"{screen_id + 1}")
+        self.canvas.config(bg=self.data_manager.bgColor)
+
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+
+        line_history = self.data_manager.line_history.copy()
+        self.main_activity.clear_butt.clear()
+        self.canvas.create_image(width * 0.5, height * 0.5, image=self.data_manager.bgImg)
+        self.data_manager.line_history = line_history.copy()
         if line_history:
             for obj, arg in line_history:
                 line_id = self.canvas.create_line(obj, **arg)
                 self.data_manager.add_line(line_id)
+
 
