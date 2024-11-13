@@ -28,12 +28,10 @@ class Canvas:
 
         self.view.bind("<Control_L>", self.move_canvas)
         self.view.bind("<Control-KeyRelease>", self.stop_moving)
+        self.main_activity.get_widget_by_tag("panel").bind("<Button-1>", self.change_focus)
 
-        self.main_activity.get_widget_by_tag("panel").bind("<Button-1>", self.test)
-
-    def test(self, event):
+    def change_focus(self, event):
         self.view.focus_set()
-        print("change focus")
 
     def stop_moving(self, event):
         if self.isMoving:
