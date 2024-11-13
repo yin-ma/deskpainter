@@ -12,6 +12,8 @@ class Canvas:
         self.border = None
         self.prevMouseX = None
         self.prevMouseY = None
+        self.totalMouseX = 0
+        self.totalMouseY = 0
 
         self.line_options = self.data_manager.line_options
         self.border_line_options = self.data_manager.border_line_options
@@ -24,16 +26,26 @@ class Canvas:
         self.canvas.bind('<B1-Motion>', self.mouse_move)
         self.canvas.bind('<ButtonRelease-1>', self.mouse_up)
 
-        self.main_activity.widget_manager.bind("<Control_L>", self.move_canvas)
-        self.main_activity.widget_manager.bind("<Control-KeyRelease>", self.stop_moving)
+        self.view.bind("<Control_L>", self.move_canvas)
+        self.view.bind("<Control-KeyRelease>", self.stop_moving)
+
+        self.main_activity.get_widget_by_tag("panel").bind("<Button-1>", self.test)
+
+    def test(self, event):
+        self.view.focus_set()
+        print("change focus")
 
     def stop_moving(self, event):
         if self.isMoving:
             self.prevMouseY = None
             self.prevMouseX = None
             self.isMoving = False
+            self.totalMouseX = 0
+            self.totalMouseY = 0
 
     def move_canvas(self, event):
+        if self.isDrawing:
+            return
         self.isMoving = True
         self.prevMouseX = event.x
         self.prevMouseY = event.y
@@ -58,17 +70,33 @@ class Canvas:
         if self.isMoving:
             for l in self.data_manager.line_id:
                 self.canvas.move(l, event.x - self.prevMouseX, event.y - self.prevMouseY)
+            self.totalMouseX += event.x - self.prevMouseX
+            self.totalMouseY += event.y - self.prevMouseY
             self.prevMouseX = event.x
             self.prevMouseY = event.y
 
     def mouse_up(self, event):
-        self.isDrawing = False
-        if len(self.points) >= 4:
-            if self.data_manager.border_mode:
-                self.data_manager.add_line(self.border)
-                self.data_manager.add_history(self.points.copy(), self.border_line_options.copy())
-            self.data_manager.add_line(self.line)
-            self.data_manager.add_history(self.points.copy(), self.line_options.copy())
-        self.points.clear()
-        self.border = None
-        self.line = None
+        if not self.isMoving:
+            self.isDrawing = False
+            if len(self.points) >= 4:
+                if self.data_manager.border_mode:
+                    self.data_manager.add_line(self.border)
+                    self.data_manager.add_history(self.points.copy(), self.border_line_options.copy())
+                self.data_manager.add_line(self.line)
+                self.data_manager.add_history(self.points.copy(), self.line_options.copy())
+            self.points.clear()
+            self.border = None
+            self.line = None
+
+        if self.isMoving:
+            for d in range(len(self.data_manager.line_history)):
+                pos, config = self.data_manager.line_history[d]
+                temp = []
+                for i in range(0, len(pos), 2):
+                    new_pos_x = pos[i] + self.totalMouseX
+                    new_pos_y = pos[i + 1] + self.totalMouseY
+                    temp.append(new_pos_x)
+                    temp.append(new_pos_y)
+                self.data_manager.line_history[d] = [temp, config]
+            self.totalMouseX = 0
+            self.totalMouseY = 0
